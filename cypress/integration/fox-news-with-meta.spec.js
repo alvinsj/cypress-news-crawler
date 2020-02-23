@@ -27,7 +27,7 @@ describe("fox-news-published-date", () => {
     });
   });
 
-  it("visits", () => {
+  it("crawls for meta", () => {
     cy.readFile("fox-news-with-meta.json").then(processed => {
       let processedUrls = Object.keys(processed);
       // 1. initialize with processed items

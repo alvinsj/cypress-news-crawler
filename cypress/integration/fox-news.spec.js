@@ -59,12 +59,8 @@ describe("fox-news", () => {
       // 7. load more
       loadMore(() => {
         // 8. save scraped data
-        let csv = {};
+        let data = {};
         cy.get(".main article").each((art, index) => {
-          let time = art
-            .find(".meta")
-            .text()
-            .trim();
           let title = art.find(".title > a").text();
           let href = art.find(".title > a").attr("href");
 
@@ -72,16 +68,15 @@ describe("fox-news", () => {
 
           // skip videos
           if (!href.match("video.foxnews"))
-            csv[href] = {
+            data[href] = {
               index,
-              time,
               title,
               href,
               description
             };
         });
 
-        cy.writeFile("fox-news.json", csv, "utf8");
+        cy.writeFile("fox-news.json", data, "utf8");
       });
     });
   });
