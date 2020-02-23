@@ -1,0 +1,16 @@
+{
+  "name": "cypress-news-crawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress open"
+  },
+  "author": "Alvin Ng",
+  "license": "MIT",
+  "dependencies": {
+    "cypress": "4.0.x",
+    "jsonexport": "2.4.1",
+    "lodash": "4.17.11"
+  }
+}
