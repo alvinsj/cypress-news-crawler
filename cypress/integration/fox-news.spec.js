@@ -2,12 +2,15 @@ const _ = require("lodash");
 
 describe("fox-news", () => {
   it("crawls fox news search > politics > between dates", () => {
+    // 1. visit page
     cy.visit("https://www.foxnews.com/search-results/search?q=trump");
 
+    // 2. select section: politics
     cy.get(".section > .select").click();
     cy.get(".section > .option > :nth-child(1) > label").click();
     cy.get(".section > .select").click();
 
+    // 3. select start date
     cy.get(".min > .month > .select").click();
     cy.get(".min > .month > .option >#11 ").click();
 
@@ -17,6 +20,7 @@ describe("fox-news", () => {
     cy.get(".min > .year > .select").click();
     cy.get(".min > .year > .option > #2019 ").click();
 
+    // 4. select end date
     cy.get(".max > .month > .select").click();
     cy.get(".max > .month > .option > .12 ").click();
 
@@ -26,53 +30,59 @@ describe("fox-news", () => {
     cy.get(".max > .year > .select").click();
     cy.get(".max > .year > .option > li:nth-of-type(2) ").click();
 
-    // click search
+    // 5. click search
     cy.get(".search-form > .button > a").click();
 
-    // click load more
-    cy.get(".button.load-more > a").click();
-
     let totalResults = 0;
-    // get number of result
+
+    // 6. get number of result
     cy.get(".num-found").then(el => {
       totalResults = parseInt(el.find("span span").text());
-      let currentNum = parseInt(el.find("span:first").text());
-      let csv = {};
 
-      // click load more
-      const loadMore = () => {
+      const loadMore = done => {
         cy.get(".button.load-more > a").click();
 
-        cy.get(".main .collection-search.active").then(search => {
+        cy.get(".main .collection-search.active").then(() => {
           let currentNum = parseInt(el.find("span:first").text());
 
-          if (currentNum + 9 < totalResults) loadMore();
-          else {
-            let articles = search.find("article");
-            cy.get(".main article").each((art, index) => {
-              let time = art
-                .find(".meta")
-                .text()
-                .trim();
-              let title = art.find(".title > a").text();
-              let href = art.find(".title > a").attr("href");
-
-              let description = art.find(".content").text();
-
-              csv[href] = {
-                time,
-                title,
-                href,
-                description
-              };
-            });
-
-            cy.writeFile("fox-news.json", csv, "utf8");
+          // there are still articles not displayed
+          if (currentNum + 9 < totalResults) {
+            loadMore(done);
+            return;
           }
+
+          // if nothing else to load, call done
+          done(results);
         });
       };
 
-      loadMore();
+      // 7. load more
+      loadMore(() => {
+        // 8. save scraped data
+        let csv = {};
+        cy.get(".main article").each((art, index) => {
+          let time = art
+            .find(".meta")
+            .text()
+            .trim();
+          let title = art.find(".title > a").text();
+          let href = art.find(".title > a").attr("href");
+
+          let description = art.find(".content").text();
+
+          // skip videos
+          if (!href.match("video.foxnews"))
+            csv[href] = {
+              index,
+              time,
+              title,
+              href,
+              description
+            };
+        });
+
+        cy.writeFile("fox-news.json", csv, "utf8");
+      });
     });
   });
 });
