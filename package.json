@@ -11,6 +11,6 @@
   "dependencies": {
     "cypress": "4.0.x",
     "jsonexport": "2.4.1",
-    "lodash": "4.17.11"
+    "lodash": "4.17.21"
   }
 }
